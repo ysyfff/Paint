@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Painting Board</title>
+    <style>
+    body, ul{padding: 0;margin: 0;}
+    header{
+        background-color: #f0f0f0;
+        width: 100%;
+        height: 40px;
+        border-bottom: 1px solid #e0e0e0;
+        z-index: 0;
+    }
+    #tool{
+        position:absolute;
+        width: 200px;
+        height: 100%;
+        background-color: #e8e8e8;
+        top: 0;
+        border-right:1px solid #d8d8d8;
+        z-index: 100;
+        min-width:200px;
+    }
+    #graph{list-style: none;}
+    #graph li{
+        line-height: 40px;
+        font-size: 20px;
+        text-align: center;
+        background-color: rgba(0,0,255,.1);
+        margin-bottom: 1px;
+        cursor: pointer;
+    }
+    .active{background-color: rgba(0,0,255,.2) !important;}
+    #paint{
+        width: 100%;
+        height: 100%;
+    }
+    #content{margin-left: 203px;margin-top: 2px;}
+    #paint-board{ 
+        border:1px solid silver;
+    }
+    /*TODO:
+    height会出现滚动条*/
+    </style>
+</head>
+<body>
+    <header></header>
+    <div id="tool">
+        <ul id="graph">
+            <li class="">直线</li>
+            <li class="">矩形</li>
+            <li class="">圆形</li>
+        </ul>
+    </div>
+    <div id="paint">
+        <div id="content">
+            <canvas id="paint-board" width="1000px" height="600px"></canvas>
+        </div>
+    </div>
+    
+
+
+
+
+
+
+
+    <script>
+/*========================tool=================================*/
+    var ulg = document.getElementById('graph');
+    var currentActive = null,
+        lis=[],
+        lig=ulg.childNodes;
+    
+    
+    ulg.addEventListener('click', function(event){
+        var target = event.target;
+        if(currentActive!=null){
+            currentActive.className = '';
+        }
+        currentActive = target;
+        target.className = 'active';
+    });
+
+    var activeID = function(){
+        for(var i=0, len=lig.length; i<len; i++){
+            if(lig[i].nodeType==1) lis.push(lig[i]);
+        }
+        for(var i = 0, len = lig.length; i<len; i++){
+            if(lis[i] == currentActive){
+                return i;
+            }
+        }
+    }
+/*========================canvas=================================*/
+    var pb = document.getElementById('paint-board');
+    var Paint = {
+        ctx: pb.getContext('2d'),
+        shapeId: null, //绘制图形类型
+        getMousePos: function(event){
+            return {x:parseInt(event.clientX)-201,
+                y:parseInt(event.clientY)-41}
+        },
+        point: {
+            startX:null, startY:null, //起始点
+            tempX:null, tempY:null, //辅助点
+            endX:null, endY:null, //结束点
+            radius:null, tRadius:null //半径
+        },
+        ruin: function(sx, sy, ex, ey){
+            if(Paint.point.startX!=null){
+                if(Paint.shapeId==2){
+                    console.log(sx, sy, ex, ey)
+                    Paint.ctx.clearRect(
+                        sx-2,
+                        sy-2,
+                        ex - sx+4,
+                        ey - sy+4);
+                }
+                else if(Paint.point.endX >= Paint.point.startX && Paint.point.endY >= Paint.point.startY){//起点左上
+                    Paint.ctx.clearRect(
+                        sx-2,
+                        sy-2,
+                        ex - sx+4,
+                        ey - sy+4);      
+                }else if(Paint.point.endX >= Paint.point.startX && Paint.point.endY <= Paint.point.startY){//起点左下
+                    Paint.ctx.clearRect(
+                        sx-2,
+                        sy+2,
+                        ex - sx+4,
+                        ey - sy-4); 
+                }else if(Paint.point.endX <= Paint.point.startX && Paint.point.endY <= Paint.point.startY){//起点右下
+                    Paint.ctx.clearRect(
+                        sx+2,
+                        sy+2,
+                        ex - sx-4,
+                        ey - sy-4); 
+                }else if(Paint.point.endX <= Paint.point.startX && Paint.point.endY >= Paint.point.startY){//起点右上
+                    Paint.ctx.clearRect(
+                        sx+2,
+                        sy-2,
+                        ex - sx-4,
+                        ey - sy+4); 
+                }
+                
+            }
+        },
+        Rect: {
+            draw: function(ex, ey){
+                if(Paint.point.startX!=null){
+                    /*console.log('draw',ex, ey)*/
+                    Paint.ctx.strokeStyle = '#000000';
+                    Paint.ctx.strokeRect(
+                        Paint.point.startX,
+                        Paint.point.startY,
+                        ex - Paint.point.startX,
+                        ey - Paint.point.startY);    
+                }
+            }
+        },
+        Line: {
+            draw: function(ex, ey){
+                if(Paint.point.startX!=null){
+                    /*Paint.ctx.globalCompositeOperation = 'destination-over';*/
+                    Paint.ctx.strokeStyle = '#000000';
+                    Paint.ctx.beginPath();
+                    Paint.ctx.moveTo(Paint.point.startX, Paint.point.startY);
+                    Paint.ctx.lineTo(ex, ey);
+                    Paint.ctx.stroke();
+                }
+            }
+        },
+        Circle: {
+            draw: function(ex, ey){
+                if(Paint.point.startX!=null){
+                    Paint.ctx.beginPath();
+                    Paint.ctx.arc(
+                        Paint.point.startX,
+                        Paint.point.startY,
+                        Paint.point.radius,
+                        0,
+                        Math.PI*2,
+                        true
+                        )
+                    Paint.ctx.stroke();
+                }
+            }
+        }
+    }
+    //记录起点：鼠标点击的一瞬间的点的坐标
+    pb.addEventListener('mousedown', function(event){
+        if(currentActive==null) {
+            alert('请选择要绘制的图形！');
+            return false;
+        }
+        Paint.point.startX = Paint.getMousePos(event).x;
+        Paint.point.startY = Paint.getMousePos(event).y;
+        Paint.shapeId = activeID();
+    });
+    pb.addEventListener('mousemove', function(event){
+        
+        Paint.point.endX = Paint.getMousePos(event).x;
+        Paint.point.endY = Paint.getMousePos(event).y;
+        if(Paint.point.startX!=null){
+            var xv = Math.abs(Paint.point.endX - Paint.point.startX) || 0,
+            yv = Math.abs(Paint.point.endY - Paint.point.startY) || 0;
+            Paint.point.radius = xv > yv ? xv : yv;
+        }
+        console.log(Paint.point.radius, 'radius')
+        if(Paint.shapeId==0){
+            Paint.ruin(
+                Paint.point.startX, Paint.point.startY,
+                Paint.point.tempX, Paint.point.tempY
+                );
+            Paint.Line.draw(Paint.point.endX, Paint.point.endY);
+        }else if(Paint.shapeId==1) {
+            Paint.ruin(
+                Paint.point.startX, Paint.point.startY,
+                Paint.point.tempX, Paint.point.tempY
+                );
+            Paint.Rect.draw(Paint.point.endX, Paint.point.endY);
+        }else if(Paint.shapeId==2){
+            if(Paint.point.tRadius!=null){
+                Paint.ruin(Math.abs(Paint.point.startX - Paint.point.tRadius),
+                           Math.abs(Paint.point.startY - Paint.point.tRadius),
+                           Math.abs(Paint.point.startX + Paint.point.tRadius),
+                           Math.abs(Paint.point.startY + Paint.point.tRadius)
+                           );    
+            }
+            
+            Paint.Circle.draw(Paint.point.endX, Paint.point.endY);
+        }
+        Paint.point.tempX = Paint.point.endX;
+        Paint.point.tempY= Paint.point.endY;
+        if(Paint.point.startX!=null) Paint.point.tRadius = Paint.point.radius;
+    });
+    pb.addEventListener('mouseup', function(event){
+        Paint.point.startX = Paint.point.startY = Paint.point.endX = Paint.point.endY = Paint.point.tempX = Paint.point.tempY = null;
+        Paint.point.radius = Paint.point.tRadius = null;
+    });
+    </script>
+</body>
+</html>
