@@ -110,7 +110,6 @@
         ruin: function(sx, sy, ex, ey){
             if(Paint.point.startX!=null){
                 if(Paint.shapeId==2){
-                    console.log(sx, sy, ex, ey)
                     Paint.ctx.clearRect(
                         sx-2,
                         sy-2,
@@ -205,7 +204,6 @@
             yv = Math.abs(Paint.point.endY - Paint.point.startY) || 0;
             Paint.point.radius = xv > yv ? xv : yv;
         }
-        console.log(Paint.point.radius, 'radius')
         if(Paint.shapeId==0){
             Paint.ruin(
                 Paint.point.startX, Paint.point.startY,
