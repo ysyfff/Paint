@@ -110,36 +110,36 @@
         ruin: function(sx, sy, ex, ey){
             if(Paint.point.startX!=null){
                 if(Paint.shapeId==2){
-                    Paint.ctx.strokeRect(
-                        sx-2,
-                        sy-2,
-                        ex - sx + 4,
-                        ey - sy + 4);
+                    Paint.ctx.clearRect(
+                        sx-8,
+                        sy-8,
+                        ex - sx + 16,
+                        ey - sy + 16);
                 }
                 else if(Paint.point.endX >= Paint.point.startX && Paint.point.endY >= Paint.point.startY){//起点左上
-                    Paint.ctx.strokeRect(
-                        sx-2,
-                        sy-2,
-                        ex - sx + 4,
-                        ey - sy + 4);      
+                    Paint.ctx.clearRect(
+                        sx-8,
+                        sy-8,
+                        ex - sx + 16,
+                        ey - sy + 16);      
                 }else if(Paint.point.endX >= Paint.point.startX && Paint.point.endY <= Paint.point.startY){//起点左下
-                    Paint.ctx.strokeRect(
-                        sx - 2,
-                        ey - 2,
-                        ex - sx + 4,
-                        sy - ey + 4); 
+                    Paint.ctx.clearRect(
+                        sx - 8,
+                        ey - 8,
+                        ex - sx + 16,
+                        sy - ey + 16); 
                 }else if(Paint.point.endX <= Paint.point.startX && Paint.point.endY <= Paint.point.startY){//起点右下
-                    Paint.ctx.strokeRect(
-                        ex - 2,
-                        ey - 2,
-                        sx - ex + 4,
-                        sy - ey + 4); 
+                    Paint.ctx.clearRect(
+                        ex - 8,
+                        ey - 8,
+                        sx - ex + 16,
+                        sy - ey + 16); 
                 }else if(Paint.point.endX <= Paint.point.startX && Paint.point.endY >= Paint.point.startY){//起点右上
-                    Paint.ctx.strokeRect(
-                        ex - 2,
-                        sy - 2,
-                        sx - ex + 4,
-                        ey - sy + 4); 
+                    Paint.ctx.clearRect(
+                        ex - 8,
+                        sy - 8,
+                        sx - ex + 16,
+                        ey - sy + 16); 
                 }
             }
         },
@@ -161,6 +161,16 @@
                 if(Paint.point.startX!=null){
                     /*Paint.ctx.globalCompositeOperation = 'destination-over';*/
                     Paint.ctx.strokeStyle = '#000000';
+                    Paint.ctx.beginPath();
+                    Paint.ctx.moveTo(Paint.point.startX, Paint.point.startY);
+                    Paint.ctx.lineTo(ex, ey);
+                    Paint.ctx.stroke();
+                }
+            },
+            ruin: function(ex, ey){
+                if(Paint.point.startX!=null){
+                    /*Paint.ctx.globalCompositeOperation = 'destination-over';*/
+                    Paint.ctx.strokeStyle = 'white';
                     Paint.ctx.beginPath();
                     Paint.ctx.moveTo(Paint.point.startX, Paint.point.startY);
                     Paint.ctx.lineTo(ex, ey);
@@ -205,6 +215,7 @@
             Paint.point.radius = xv > yv ? xv : yv;
         }
         if(Paint.shapeId==0){
+            /*Paint.Line.ruin(Paint.point.tempX, Paint.point.tempY);*/
             Paint.ruin(
                 Paint.point.startX, Paint.point.startY,
                 Paint.point.tempX, Paint.point.tempY
