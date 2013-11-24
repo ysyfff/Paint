@@ -11,7 +11,8 @@
         border-bottom: 1px solid #e0e0e0;
         z-index: 0;
     }
-    #tool{
+    #graph{
+        list-style: none;
         position:absolute;
         width: 200px;
         height: 100%;
@@ -19,9 +20,7 @@
         top: 0;
         border-right:1px solid #d8d8d8;
         z-index: 100;
-        min-width:200px;
-    }
-    #graph{list-style: none;}
+        min-width:200px;}
     #graph li{
         line-height: 40px;
         font-size: 20px;
@@ -38,62 +37,97 @@
     #content{margin-left: 203px;margin-top: 2px;}
     #paint-board{ 
         border:1px solid silver;
+        background-color: white;
+    }
+    #oper{
+        list-style: none;
+        position: absolute;
+        right: 0;
+        height: 41px;
+        width: 200px;
+    }
+    #oper li{
+        float:right;
+        line-height: 41px;
+        width: 90px;
+        text-align: center;
+        cursor: pointer;
+        background-color:rgba(0,0,255,.1);
+        margin-left:1px;
+        font-weight: bold;
+        font-size: 16px;
+    }
+    #save{
+        color: #30bf30;
+    }
+    #ruin{
+        color: #bf3030;
     }
     /*TODO:
     height会出现滚动条*/
     </style>
 </head>
 <body>
-    <header></header>
-    <div id="tool">
-        <ul id="graph">
-            <li class="">直线</li>
-            <li class="">矩形</li>
-            <li class="">圆形</li>
+    <header>
+        <ul id="oper">
+            <li id="save">存为图片</li>
+            <li id="ruin">清除画布</li>
         </ul>
-    </div>
+    </header>
+    <ul id="graph">
+        <li class="">直线</li>
+        <li class="">矩形</li>
+        <li class="">圆形</li>
+    </ul>
     <div id="paint">
         <div id="content">
             <canvas id="paint-board" width="1000px" height="600px"></canvas>
         </div>
     </div>
-    
-
-
-
-
-
 
 
     <script>
 /*========================tool=================================*/
-    var ulg = document.getElementById('graph');
-    var currentActive = null,
-        lis=[],
-        lig=ulg.childNodes;
-    
-    
-    ulg.addEventListener('click', function(event){
-        var target = event.target;
-        if(currentActive!=null){
-            currentActive.className = '';
+    var tool = {
+        ulg: document.getElementById('graph'),
+        save: document.getElementById('save'),
+        ruin: document.getElementById('ruin'),
+        currentActive: null,
+        lis: [],
+        activeID: function(){
+            for(var i=0, len=tool.lig.length; i<len; i++){
+                if(tool.lig[i].nodeType==1) tool.lis.push(tool.lig[i]);
+            }
+            for(var i = 0, len = tool.lis.length; i<len; i++){
+                if(tool.lis[i] == tool.currentActive){
+                    return i;
+                }
+            }
         }
-        currentActive = target;
+    };
+    tool.lig = tool.ulg.childNodes;
+
+    tool.ulg.addEventListener('click', function(event){
+        var target = event.target;
+        if(tool.currentActive!=null){
+            tool.currentActive.className = '';
+        }
+        tool.currentActive = target;
         target.className = 'active';
     });
 
-    var activeID = function(){
-        for(var i=0, len=lig.length; i<len; i++){
-            if(lig[i].nodeType==1) lis.push(lig[i]);
-        }
-        for(var i = 0, len = lig.length; i<len; i++){
-            if(lis[i] == currentActive){
-                return i;
-            }
-        }
-    }
-/*========================canvas=================================*/
-    /*var pb = document.getElementById('paint-board');*/
+    tool.ruin.addEventListener('click', function(){
+        Paint.ctx.clearRect(0,0,1000,600);
+    });
+
+    tool.save.addEventListener('click', function(){
+        var img = Paint.pb.toDataURL('image/png');
+        console.log(img)
+        var w = window.open('about:blank', 'save your image.');
+        w.document.write("<img src='"+img+"' alt='from canvas' />");
+        console.log('zhe')
+    });
+/*========================paint=================================*/
     var Paint = {
         pb: document.getElementById('paint-board'),
         shapeId: null, //绘制图形类型
@@ -235,13 +269,13 @@
     Paint.ctx = Paint.pb.getContext('2d');
     //记录起点：鼠标点击的一瞬间的点的坐标
     Paint.pb.addEventListener('mousedown', function(event){
-        if(currentActive==null) {
+        if(tool.currentActive==null) {
             alert('请选择要绘制的图形！');
             return false;
         }
         Paint.point.startX = Paint.getMousePos(event).x;
         Paint.point.startY = Paint.getMousePos(event).y;
-        Paint.shapeId = activeID();
+        Paint.shapeId = tool.activeID();
     });
     //鼠标移动时完成绘制与清除
     Paint.pb.addEventListener('mousemove', function(event){
