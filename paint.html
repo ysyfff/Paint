@@ -110,32 +110,32 @@
         ruin: function(sx, sy, ex, ey){
             if(Paint.point.startX!=null){
                 if(Paint.shapeId==2){
-                    Paint.ctx.clearRect(
+                    Paint.ctx.strokeRect(
                         sx-2,
                         sy-2,
                         ex - sx + 4,
                         ey - sy + 4);
                 }
                 else if(Paint.point.endX >= Paint.point.startX && Paint.point.endY >= Paint.point.startY){//起点左上
-                    Paint.ctx.clearRect(
+                    Paint.ctx.strokeRect(
                         sx-2,
                         sy-2,
                         ex - sx + 4,
                         ey - sy + 4);      
                 }else if(Paint.point.endX >= Paint.point.startX && Paint.point.endY <= Paint.point.startY){//起点左下
-                    Paint.ctx.clearRect(
+                    Paint.ctx.strokeRect(
                         sx - 2,
                         ey - 2,
                         ex - sx + 4,
                         sy - ey + 4); 
                 }else if(Paint.point.endX <= Paint.point.startX && Paint.point.endY <= Paint.point.startY){//起点右下
-                    Paint.ctx.clearRect(
+                    Paint.ctx.strokeRect(
                         ex - 2,
                         ey - 2,
                         sx - ex + 4,
                         sy - ey + 4); 
                 }else if(Paint.point.endX <= Paint.point.startX && Paint.point.endY >= Paint.point.startY){//起点右上
-                    Paint.ctx.clearRect(
+                    Paint.ctx.strokeRect(
                         ex - 2,
                         sy - 2,
                         sx - ex + 4,
